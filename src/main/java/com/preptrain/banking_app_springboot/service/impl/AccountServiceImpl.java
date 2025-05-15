@@ -1,7 +1,10 @@
 package com.preptrain.banking_app_springboot.service.impl;
 
 import com.preptrain.banking_app_springboot.dto.AccountDto;
+import com.preptrain.banking_app_springboot.dto.TransferAccountDto;
 import com.preptrain.banking_app_springboot.entity.Account;
+import com.preptrain.banking_app_springboot.exception.AccountException;
+import com.preptrain.banking_app_springboot.exception.InsufficientBalanceException;
 import com.preptrain.banking_app_springboot.mapper.AccountMapper;
 import com.preptrain.banking_app_springboot.repository.AccountRepository;
 import com.preptrain.banking_app_springboot.service.AccountService;
@@ -29,7 +32,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountDto getAccountById(final Long id) {
         Account account = accountRepository.findById(id).orElseThrow(()->
-                new RuntimeException("Account not found with id: " + id));
+                new AccountException("Account not found with id: " + id));
 
         return AccountMapper.mapToAccountDto(account);
 
@@ -44,7 +47,7 @@ public class AccountServiceImpl implements AccountService {
             Account updatedAccount = accountRepository.save(account);
             return AccountMapper.mapToAccountDto(updatedAccount);
         } else {
-            throw new RuntimeException("Account not found with id: " + id);
+            throw new AccountException("Account not found with id: " + id);
         }
     }
 
@@ -63,7 +66,7 @@ public class AccountServiceImpl implements AccountService {
                 throw new RuntimeException("Insufficient balance in account with id: " + id);
             }
         } else {
-            throw new RuntimeException("Account not found with id: " + id);
+            throw new AccountException("Account not found with id: " + id);
         }
     }
 
@@ -86,7 +89,27 @@ public class AccountServiceImpl implements AccountService {
             accountRepository.delete(optionalAccount.get());
             return AccountMapper.mapToAccountDto(optionalAccount.get());
         } else {
-            throw new RuntimeException("Account not found with id: " + id);
+            throw new AccountException("Account not found with id: " + id);
+        }
+    }
+
+    @Override
+    public void transferAmount(final TransferAccountDto transferAccountDto) {
+
+//find by id else throw
+        Account fromAccount = accountRepository.findById(transferAccountDto.fromAccountId()).orElseThrow(()->
+                new AccountException("Account not found with id: " + transferAccountDto.fromAccountId()));
+        Account toAccount = accountRepository.findById(transferAccountDto.toAccountId()).orElseThrow(()->
+                new AccountException("Account not found with id: " + transferAccountDto.toAccountId()));
+
+        //check if balance is sufficient
+        if (fromAccount.getBalance() >= transferAccountDto.amount()) {
+            fromAccount.setBalance(fromAccount.getBalance() - transferAccountDto.amount());
+            toAccount.setBalance(toAccount.getBalance() + transferAccountDto.amount());
+            accountRepository.save(fromAccount);
+            accountRepository.save(toAccount);
+        } else {
+            throw new InsufficientBalanceException("Insufficient balance in account with id: " + transferAccountDto.fromAccountId());
         }
     }
 

@@ -1,7 +1,7 @@
 package com.preptrain.banking_app_springboot.controller;
 
 import com.preptrain.banking_app_springboot.dto.AccountDto;
-import com.preptrain.banking_app_springboot.entity.Account;
+import com.preptrain.banking_app_springboot.dto.TransferAccountDto;
 import com.preptrain.banking_app_springboot.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,6 +62,12 @@ public class AccountController {
     public ResponseEntity<AccountDto> deleteAccount(@PathVariable Long id) {
         AccountDto deletedAccount = accountService.deleteAccount(id);
         return ResponseEntity.ok(deletedAccount);
+    }
+
+    @PutMapping("/transfer")
+    public ResponseEntity<String> transferAmount(@RequestBody TransferAccountDto transferAccountDto) {
+        accountService.transferAmount(transferAccountDto);
+        return ResponseEntity.ok("Transfer successful");
     }
 
 }

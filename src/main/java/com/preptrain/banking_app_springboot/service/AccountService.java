@@ -1,7 +1,7 @@
 package com.preptrain.banking_app_springboot.service;
 
 import com.preptrain.banking_app_springboot.dto.AccountDto;
-import com.preptrain.banking_app_springboot.entity.Account;
+import com.preptrain.banking_app_springboot.dto.TransferAccountDto;
 
 import java.util.List;
 
@@ -17,4 +17,6 @@ public interface AccountService {
     List<AccountDto> getAllAccounts();
 
     AccountDto deleteAccount(Long id);
+
+    void transferAmount(TransferAccountDto transferAccountDto);
 }
